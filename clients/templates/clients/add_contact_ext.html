@@ -1,0 +1,10 @@
+{% extends 'deals/base.html' %}
+{% block content %}
+<form action="" method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+
+<button type="submit" class="btn btn-primary">Сохранить</button>
+  <button type="reset" class="btn btn-secondary">Очистить всё</button>
+</form>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'deals/base.html' %}
+{% block content %}
+<div class="container mt-2">
+  <div class="row">
+    <div class="col-md-6 mt-5">
+      <h3 class="text-center">Клиенты</h3>
+      <table class="table table-bordered table-hover fs-6">
+        <tbody>
+          {% if clients %}
+            {% for client in clients %}
+              <tr>
+                <td>
+                  <h5><a href="{% url 'partner_detail' client.id %}">{{ client.name }}</a></h5>
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td class="text-center"><h5>Тут пусто</h5></td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <aside class="col-md-6 mt-5">
+      <h3 class="text-center">Перевозчики</h3>
+      <table class="table table-bordered table-hover fs-6">
+        <tbody>
+          {% if trans %}
+            {% for tran in trans %}
+              <tr>
+                <td>
+                  <h5><a href="{% url 'partner_detail' tran.id %}">{{ tran.name }}</a></h5>
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td class="text-center"><h5>Тут пусто</h5></td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </aside>
+  </div>
+</div>
+{% endblock %}

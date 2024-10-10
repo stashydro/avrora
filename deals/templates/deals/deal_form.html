@@ -1,0 +1,48 @@
+{% extends 'deals/base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Добавление сделки</h2>
+  <form action="{% url 'add_deal' %}" method="POST">
+    {% csrf_token %}
+    <div class="row">
+      <div class="col-md-6 offset-md-3">
+<!--        <div class="form-group mb-3">-->
+<!--          <label for="client">{{ form.client.label }}</label>-->
+<!--          <select name="client" class="form-control" id="client">-->
+<!--            {% for client in form.client.field.queryset %}-->
+<!--              <option value="{{ client.id }}" {% if client.id == form.client.value %}selected{% endif %}>{{ client.name }}</option>-->
+<!--            {% endfor %}-->
+<!--          </select>-->
+<!--        </div>-->
+
+<!--        <div class="form-group mb-3">-->
+<!--          <label for="transporter">{{ form.transporter.label }}</label>-->
+<!--          <select name="transporter" class="form-control" id="transporter">-->
+<!--            {% for transporter in form.transporter.field.queryset %}-->
+<!--              <option value="{{ transporter.id }}" {% if transporter.id == form.transporter.value %}selected{% endif %}>{{ transporter.name }}</option>-->
+<!--            {% endfor %}-->
+<!--          </select>-->
+<!--        </div>-->
+
+<!--        <div class="form-group mb-3">-->
+<!--          <label for="income">{{ form.income.label }}</label>-->
+<!--          <input type="number" name="income" class="form-control" id="income" value="{{ form.income.value }}">-->
+<!--        </div>-->
+
+        <!-- Добавьте другие поля формы аналогично -->
+        {% for field in form %}
+          <div class="form-group mb-3">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+          </div>
+        {% endfor %}
+
+        <div class="d-flex justify-content-between mt-4">
+          <button type="submit" class="btn btn-primary">Отправить</button>
+          <button type="reset" class="btn btn-secondary">Очистить всё</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

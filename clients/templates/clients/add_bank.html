@@ -1,0 +1,53 @@
+{% extends 'deals/base.html' %}
+{% block content %}
+<div class="container mt-3">
+  <form action="" method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      {{ form.as_p }}
+    </div>
+
+    <div class="d-flex justify-content-between">
+      <button type="button" id="search-bic" class="btn btn-info">Поиск по БИК</button>
+      <div>
+        <button type="submit" class="btn btn-primary me-2">Сохранить</button>
+        <button type="submit" name="save_and_exit" class="btn btn-secondary me-2">Сохранить и выйти</button>
+        <button type="reset" class="btn btn-danger">Очистить всё</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+document.getElementById('search-bic').addEventListener('click', function() {
+    var bic = document.getElementById('id_bic').value;
+
+    if (bic) {
+        // Отправляем запрос к API DaData для поиска компании
+        fetch('{% url 'get_bank_info' %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',  // CSRF защита для Django
+            },
+            body: JSON.stringify({bic: bic})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Автоматически заполняем поля формы
+                document.getElementById('id_bank_name').value = data.bank_name;
+                document.getElementById('id_correspondent_account').value = data.correspondent_account;
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+        });
+    } else {
+        alert('Введите БИК');
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'deals/base.html' %}
+
+
+
+{% block content %}
+<div class = 'container mt-2'>
+  <div class = 'row'>
+    <div class = 'col-md-10 mt-5'>
+<center><h1>Все сделки</h1></center>
+<table class="table fs-6">
+  <thead>
+    <tr class="table-header-border">
+      <th scope="col">Номер заявки клиента</th>
+      <th scope="col">Клиент</th>
+<!--      <th scope="col">Стоимость клиента</th>-->
+      <th scope="col">Перевозчик</th>
+<!--      <th scope="col">Контакт водителя</th>-->
+<!--      <th scope="col">Стоимость перевозчика</th>-->
+      <th scope="col">Прибыль после НДС/УСН</th>
+      <th scope="col">Комментарий</th>
+    </tr>
+
+  </thead>
+
+<!--{% for deal in deals%}-->
+<!--  <tbody>-->
+<!--    <tr>-->
+<!--      <th scope="row"><a href="{% url 'deal_details' deal.id %}">{{ deal.client_contract }}</a></th>-->
+<!--      <td>{{ deal.client.name }}</td>-->
+<!--      <td>{{ deal.income }}</td>-->
+<!--      <td>{{ deal.transporter.name }}</td>-->
+<!--      <td>{{ deal.driver }}</td>-->
+<!--      <td>{{ deal.outcome }}</td>-->
+<!--      <td>{{ deal.result|floatformat:2 }}</td>-->
+<!--      <td>{{ deal.description }}</td>-->
+<!--    </tr>-->
+<!--  </tbody>-->
+<!--{% endfor %}-->
+  {% for month_year, deals in grouped_deals.items %}
+    <tbody>
+     <tr class="month-year-border">
+      <th colspan="5"><b>{{ month_year }}</b></th>
+    </tr>
+      {% for deal in deals %}
+      <tr>
+
+        <th scope="row">
+          <a href="{% url 'deal_details' deal.id %}">{{ deal.client_contract }}</a>
+        </th>
+        <td>{{ deal.client_text }}</td>
+<!--        <td>{{ deal.income }}</td>-->
+        <td>{{ deal.trans_text }}</td>
+<!--        <td>{{ deal.driver }}</td>-->
+<!--        <td>{{ deal.outcome }}</td>-->
+        <td>{{ deal.result|floatformat:2 }}</td>
+        <td>{{ deal.description }}</td>
+
+      </tr>
+      {% endfor %}
+    </tbody>
+  {% endfor %}
+    </ul>
+
+
+
+  </table>
+    </div>
+        <aside class = 'col-md-2 ml-md-3 mt-5 bg-warning'>
+      <center>
+        <h4>Сделки в работе</h4>
+        <br><br>
+        {% for deal in incomplete_deals %}
+        <li><a href="{% url 'deal_details' deal.id %}">
+          {{ deal.client_contract}} : {{ deal.client.name }}</a></li>
+        {% empty %}
+          <h4>Ничего нет</h4>
+        {% endfor %}
+      </center>
+    </aside>
+  </div>
+</div>
+
+
+
+
+{% endblock %}

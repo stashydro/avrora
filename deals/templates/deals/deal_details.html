@@ -1,0 +1,29 @@
+{% extends 'deals/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Детали сделки</h2>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5 class="card-title">Информация о сделке</h5>
+      <p class="card-text"><strong>Клиент:</strong> <a href="{% url 'partner_detail' deal.client.id %}">{{ deal.client.name }}</a></p>
+      <p class="card-text"><strong>Перевозчик:</strong> <a href="{% url 'partner_detail' deal.transporter.id %}">{{ deal.transporter.name }}</a></p>
+      <p class="card-text"><strong>Доход:</strong> {{ deal.income }}</p>
+      <p class="card-text"><strong>Расход:</strong> {{ deal.outcome }}</p>
+      <p class="card-text"><strong>Дополнительные расходы:</strong> {{ deal.add_costs }}</p>
+      <p class="card-text"><strong>Прибыль:</strong> {{ deal.result|floatformat:2 }}</p>
+      <p class="card-text"><strong>Описание:</strong> {{ deal.description }}</p>
+      <p class="card-text"><strong>Водитель:</strong> {{ deal.driver }}</p>
+    </div>
+  </div>
+  {% if deal.complete is False %}
+  <form method="POST" class="text-center">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-success">Сделка закрыта</button>
+  </form>
+  {% else %}
+  <p> Сделка уже закрыта</p>
+  {% endif %}
+</div>
+{% endblock %}

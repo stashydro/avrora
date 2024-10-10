@@ -1,0 +1,1 @@
+web: gunicorn avrora.wsgi --log-file -

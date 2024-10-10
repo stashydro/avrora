@@ -1,0 +1,96 @@
+{% extends 'deals/base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h1>{{ partner.get_type_display }}: {{ partner.name }}</h1>
+
+    <h2>Реквизиты</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th scope="col">Сокращенное название</th>
+                <th scope="col">Полное название</th>
+                <th scope="col">ИНН</th>
+                <th scope="col">КПП</th>
+                <th scope="col">ОГРН</th>
+                <th scope="col">Юридический адрес</th>
+                <th scope="col">ФИО директора</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                {% if partner_rek %}
+                <td>{{ partner_rek.company_short }}</td>
+                <td>{{ partner_rek.company_full }}</td>
+                <td>{{ partner_rek.inn }}</td>
+                <td>{{ partner_rek.kpp }}</td>
+                <td>{{ partner_rek.ogrn }}</td>
+                <td>{{ partner_rek.legal_address }}</td>
+                <td>{{ partner_rek.director }}</td>
+                {% else %}
+                Реквизиты отсутствуют<a href="{% url 'add_rekvizity' partner.id%}">Добавить</a>
+                {% endif %}
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Банковские реквизиты</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th scope="col">Наименование банка</th>
+                <th scope="col">БИК</th>
+                <th scope="col">Корреспондентский счет</th>
+                <th scope="col">Расчетный счет</th>
+            </tr>
+        </thead>
+        <tbody>
+
+                {% if partner_banks %}
+                <a href="{% url 'add_bank' partner_rek.id %}">Добавить еще</a>
+                {% for partner_bank in partner_banks %}
+                <tr>
+                <td>{{ partner_bank.bank_name }}</td>
+                <td>{{ partner_bank.bic }}</td>
+                <td>{{ partner_bank.correspondent_account }}</td>
+                <td>{{ partner_bank.checking_account }}</td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                    {% if partner_rek %}
+                        Реквизиты отсутствуют<a href="{% url 'add_bank' partner_rek.id %}">Добавить</a>
+                    {% else %}
+                        Сначала добавить реквизиты фирмы
+                    {% endif %}
+                {% endif %}
+
+        </tbody>
+    </table>
+
+    <h2>Контакты</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th scope="col">ФИО контакта</th>
+                <th scope="col">Email</th>
+                <th scope="col">Телефон</th>
+                <th scope="col">Должность</th>
+            </tr>
+        </thead>
+        <tbody>
+                {% if partner_contacts %}
+                <a href="{% url 'add_contact_ext' partner.id%}">Добавить еще</a>
+                {% for partner in partner_contacts %}
+            <tr>
+                <td>{{ partner.name }}</td>
+                <td>{{ partner.email }}</td>
+                <td>{{ partner.phone }}</td>
+                <td>{{ partner.get_position_display }}</td>
+            </tr>
+                {% endfor %}
+                {% else %}
+                Контактов нет <a href="{% url 'add_contact_ext' partner.id%}">Добавить</a>
+                {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -13,9 +13,15 @@ class TicketView(CreateView,ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['tickets'] = Ticket.objects.all()
+        context['tickets'] = self.get_queryset()
         return context
 
     def form_valid(self, form):
         form.instance.user = self.request.user  # Устанавливаем текущего пользователя
         return super().form_valid(form)
+
+    def get_queryset(self):
+        if self.request.user.is_staff:  # Проверка, является ли пользователь администратором
+            return Ticket.objects.all()  # Администратор видит все тикеты
+        else:
+            return Ticket.objects.filter(user=self.request.user)  # Обычный пользователь видит только свои тикеты

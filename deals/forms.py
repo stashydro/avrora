@@ -1,6 +1,6 @@
 from django import forms
 
-from clients.models import Partner
+from clients.models import Partner,Our_company
 from .models import Deal
 
 class PartnerChoiceField(forms.ModelChoiceField):
@@ -29,3 +29,4 @@ class DealForm(forms.ModelForm):
         # Поле для перевозчиков
         self.fields['transporter'].queryset = Partner.objects.filter(type='trans')
         self.fields['transporter'].label_from_instance = lambda obj: obj.name
+

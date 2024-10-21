@@ -48,22 +48,31 @@
               <a class="nav-link" href="{% url 'partners' %}">Контрагенты</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'tickets' %}">Тикеты</a>
+              <a class="nav-link" href="{% url 'result' %}">Сводная таблица</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'result' %}">Сводная таблица</a>
+              <a class="nav-link" href="{% url 'new_order' %}">Создать заявку</a>
             </li>
             {% if user.is_superuser %}
             <li class="nav-item">
               <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
             </li>
             {% endif %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'tickets' %}">Тикеты</a>
+            </li>
           </ul>
             <div class="ms-auto d-flex">
 
                <span class="navbar-text text-light me-2">
+
+                 {% if user.first_name %}
                   {{ user.first_name }}
+                 {% else %}
+                 {{ user.username }}
+                 {% endif %}
                </span>
+
               <form action ='{% url "logout" %}' method="post">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-outline-light me-1">Выйти</button>

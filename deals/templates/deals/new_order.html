@@ -1,0 +1,247 @@
+{% extends 'deals/base.html' %}
+
+{% block content %}
+
+<form id="innForm">
+    <label for="inn">Введите ИНН:</label>
+    <input type="text" id="inn" name="inn" required>
+    <label for="company">Выберите компанию:</label>
+    <select id="company" name="company" required>
+        <option value="">--Выберите компанию--</option>
+        {% for company in our_companies %}
+            <option value="{{ company.id }}" required>{{ company.name }}</option>
+        {% endfor %}
+    </select>
+    <button type="button" onclick="checkINN()">Поиск по ИНН</button>
+</form>
+
+<!-- Блок для отображения результатов -->
+<div id="result"></div>
+
+<script>
+function checkINN() {
+    const inn = document.getElementById('inn').value;
+    const id = document.getElementById('company').value;
+
+    if (!id) {
+        alert("Пожалуйста, выберите компанию из списка.");
+        return; // Останавливаем выполнение функции, если компания не выбрана
+    }
+    // Отправляем запрос на сервер
+    fetch("{% url 'check_inn' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"  // передаем токен CSRF
+        },
+        body: JSON.stringify({ 'inn': inn, 'company_id': id })
+    })
+    .then(response => response.json())
+    .then(data => {
+   alert(`Наш айди епт ${id}`)
+   function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+        // Если ИНН найден
+        if (data.found) {
+        alert(`Краткая информация о партнере: ${data.partner_short},ID: ${data.id}`);
+        const partnerShortEscaped = escapeHtml(data.partner_short);
+            document.getElementById('result').innerHTML = `
+                <h2>${data.type} найден: ${data.transporter_name}</h2>
+                <form method="POST" action="{% url 'fill_template' %}">
+                {% csrf_token %}
+                <input type="hidden" id="our_id" name="our_id" value="${id}">
+                <input type="hidden" id="partner_id" name="partner_id" value="${data.id}">
+                    <div class="form-group">
+                        <label for="transporter">Перевозчик:</label>
+                        <input type="text" id="transporter" name="transporter" value="${partnerShortEscaped}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="transporter_cont">Контакт перевозчика:</label>
+                        <input type="text" id="transporter_cont" name="transporter_cont" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="order_date">Дата заявки:</label>
+                        <input type="text" id="order_date" name="order_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="order_num">Номер заявки:</label>
+                        <input type="text" id="order_num" name="order_num" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sender">Отправитель:</label>
+                        <input type="text" id="sender" name="sender" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="receiver">Получатель:</label>
+                        <input type="text" id="receiver" name="receiver" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="address_from">Адрес погрузки:</label>
+                        <input type="text" id="address_from" name="address_from" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="address_to">Адрес выгрузки:</label>
+                        <input type="text" id="address_to" name="address_to" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="date_load">Дата и время погрузки:</label>
+                        <input type="text" id="date_load" name="date_load" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="date_unload">Дата и время выгрузки:</label>
+                        <input type="text" id="date_unload" name="date_unload" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact_send">Контакт отправителя:</label>
+                        <input type="text" id="contact_send" name="contact_send" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact_receive">Контакт получателя:</label>
+                        <input type="text" id="contact_receive" name="contact_receive" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="driver">ФИО водителя:</label>
+                        <input type="text" id="driver" name="driver" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="passport_num">Номер паспорта водителя:</label>
+                        <input type="text" id="passport_num" name="passport_num" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="passport_issue">Паспорт выдан(кем и когда):</label>
+                        <input type="text" id="passport_issue" name="passport_issue" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="vehicle">Т/С:</label>
+                        <input type="text" id="vehicle" name="vehicle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="vehicle_num">Гос.номер:</label>
+                        <input type="text" id="vehicle_num" name="vehicle_num" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Контактный телефон:</label>
+                        <input type="text" id="phone" name="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cargo">Наименование груза:</label>
+                        <input type="text" id="cargo" name="cargo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity">Количество:</label>
+                        <input type="text" id="quantity" name="quantity" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="weight">Вес:</label>
+                        <input type="text" id="weight" name="weight" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="volume">Объем:</label>
+                        <input type="text" id="volume" name="volume" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="type_pack">Тип упаковки:</label>
+                        <input type="text" id="type_pack" name="type_pack">
+                    </div>
+                    <div class="form-group">
+                        <label for="add_info">Дополнительная информация:</label>
+                        <input type="text" id="add_info" name="add_info" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Стоимость перевозки:</label>
+                        <input type="text" id="price" name="price" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="conditions">Условия оплаты:</label>
+                        <input type="text" id="conditions" name="conditions" required>
+                    </div>
+                    <button type="submit">Отправить</button>
+                </form>
+
+            `;
+        } else {
+            // Если ИНН не найден
+            document.getElementById('result').innerHTML = `
+                <h2>ИНН ${data.inn} не найден</h2>
+                <p>Контрагент с таким ИНН отсутствует. <a href="{% url 'add_partner' %}">Добавить нового контрагента</a></p>
+            `;
+        }
+    });
+}
+// тут конец предыдущего кода
+
+
+    function submitForm() {
+
+        // Собираем данные из всех полей формы
+        const our_id = document.getElementById('our_id').value;
+        const partner_id = document.getElementById('partner_id').value;
+        const transporter = document.getElementById('transporter').value;
+        const sender = document.getElementById('sender').value;
+        const receiver = document.getElementById('receiver').value;
+        const addressFrom = document.getElementById('address_from').value;
+        const addressTo = document.getElementById('address_to').value;
+        const dateLoad = document.getElementById('date_load').value;
+        const dateUnload = document.getElementById('date_unload').value;
+        const contactSend = document.getElementById('contact_send').value;
+        const contactReceive = document.getElementById('contact_receive').value;
+        const driver = document.getElementById('driver').value;
+        const passportNum = document.getElementById('passport_num').value;
+        const passportIssue = document.getElementById('passport_issue').value;
+        const vehicle = document.getElementById('vehicle').value;
+        const vehicleNum = document.getElementById('vehicle_num').value;
+        const phone = document.getElementById('phone').value;
+        const cargo = document.getElementById('cargo').value;
+        const quantity = document.getElementById('quantity').value;
+        const weight = document.getElementById('weight').value;
+        const volume = document.getElementById('volume').value;
+        const typePack = document.getElementById('type_pack').value;
+        const addInfo = document.getElementById('add_info').value;
+        const price = document.getElementById('price').value;
+        const conditions = document.getElementById('conditions').value;
+
+
+        // Отправляем данные на сервер
+        fetch("{% url 'fill_template' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"  // передаем токен CSRF
+            },
+            body: JSON.stringify({
+                partner_id: partner_id,
+                our_id: our_id,
+                transporter: transporter,
+                sender: sender,
+                receiver: receiver,
+                address_from: addressFrom,
+                address_to: addressTo,
+                date_load: dateLoad,
+                date_unload: dateUnload,
+                contact_send: contactSend,
+                contact_receive: contactReceive,
+                driver: driver,
+                passport_num: passportNum,
+                passport_issue: passportIssue,
+                vehicle: vehicle,
+                vehicle_num: vehicleNum,
+                phone: phone,
+                cargo: cargo,
+                quantity: quantity,
+                weight: weight,
+                volume: volume,
+                type_pack: typePack,
+                add_info: addInfo,
+                price: price,
+                conditions: conditions
+            })
+        })
+}
+</script>
+{% endblock %}

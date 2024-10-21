@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 import django_heroku
 import dj_database_url
@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-a0==#74fv^^4r-s296(v^r6tro6q+95s00zm=bfu2*x*db30(u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['avrora-6133504e460e.herokuapp.com','localhost']
+ALLOWED_HOSTS = ['avrora-6133504e460e.herokuapp.com','127.0.0.1','localhost']
 
 
 # Application definition
@@ -85,13 +85,12 @@ WSGI_APPLICATION = 'avrora.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
-  #  {
-   # 'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': BASE_DIR / 'db.sqlite3',
-    # }
-#}
+# DATABASES = {     #['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
@@ -128,7 +127,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "static",  # Убедитесь, что путь к статическим файлам указан правильно
+]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

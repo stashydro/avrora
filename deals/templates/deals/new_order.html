@@ -1,19 +1,108 @@
 {% extends 'deals/base.html' %}
 
 {% block content %}
+  <style>
+    .wrapper {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr); /* Две колонки */
+      background-color: whitesmoke;
+      list-style-type: none;
+      padding: 0;
+      border-radius: 3px;
+    }
+    .form-row {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 0.5em;
+    }
 
-<form id="innForm">
-    <label for="inn">Введите ИНН:</label>
-    <input type="text" id="inn" name="inn" required>
-    <label for="company">Выберите компанию:</label>
-    <select id="company" name="company" required>
-        <option value="">--Выберите компанию--</option>
-        {% for company in our_companies %}
-            <option value="{{ company.id }}" required>{{ company.name }}</option>
-        {% endfor %}
-    </select>
-    <button type="button" onclick="checkINN()">Поиск по ИНН</button>
+    .form-row label {
+      margin-right: 1em; /* Отступ между названием поля и самим полем */
+      width: 150px; /* Установите фиксированную ширину для всех названий полей */
+      text-align: right; /* Выровнять текст по правому краю */
+    }
+    .form-row > input {
+      flex: 1;
+      max-width: 300;
+    }
+    .form-row > button {
+      background: gray;
+      color: white;
+      border: 0;
+      display: flex;
+      justify-content: center;
+    }
+    .button-container {
+      display: flex;
+      justify-content: center; /* Центрирование кнопки */
+      padding: 1em 0; /* Отступы сверху и снизу для кнопки */
+    }
+    #otherContactFields {
+        visibility: hidden;
+        border: 2px solid #ccc; /* Тонкая граница */
+        padding: 10px; /* Отступы внутри div */
+        margin-top: 10px; /* Отступ сверху */
+        border-radius: 5px; /* Закругленные углы (по желанию) */
+        background-color: #f9f9f9; /* Светлый фон (по желанию) */
+    }
+    #newContactFields {
+        border: 2px solid #ccc; /* Тонкая граница */
+        padding: 10px; /* Отступы внутри div */
+        margin-top: 10px; /* Отступ сверху */
+        border-radius: 5px; /* Закругленные углы (по желанию) */
+        background-color: #f9f9f9; /* Светлый фон (по желанию) */
+    }
+    #driverFields {
+        border: 2px solid #ccc; /* Тонкая граница */
+        padding: 10px; /* Отступы внутри div */
+        margin-top: 10px; /* Отступ сверху */
+        border-radius: 5px; /* Закругленные углы (по желанию) */
+        background-color: #f9f9f9; /* Светлый фон (по желанию) */
+    }
+    #cargoFields {
+        border: 2px solid #ccc; /* Тонкая граница */
+        padding: 10px; /* Отступы внутри div */
+        margin-top: 10px; /* Отступ сверху */
+        border-radius: 5px; /* Закругленные углы (по желанию) */
+        background-color: #f9f9f9; /* Светлый фон (по желанию) */
+    }
+    #generalFields {
+        border: 2px solid #ccc; /* Тонкая граница */
+        padding: 10px; /* Отступы внутри div */
+        margin-top: 10px; /* Отступ сверху */
+        border-radius: 5px; /* Закругленные углы (по желанию) */
+        background-color: #f9f9f9; /* Светлый фон (по желанию) */
+    }
+    </style>
+<form id="innForm" class="container mt-4">
+    <div class="form-group row">
+        <label for="inn" class="col-sm-2 col-form-label">ИНН перевозчика:</label>
+        <div class="col-sm-10">
+            <input type="text" id="inn" name="inn" class="form-control" required>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label for="company" class="col-sm-2 col-form-label">Выберите нашу компанию:</label>
+        <div class="col-sm-10">
+            <select id="company" name="company" class="form-control" required>
+                <option value="">--Выберите наше юр.лицо-</option>
+                {% for company in our_companies %}
+                    <option value="{{ company.id }}">{{ company.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-sm-10 offset-sm-2">
+            <button type="button" class="btn btn-primary" onclick="checkINN()">Поиск по ИНН</button>
+        </div>
+    </div>
 </form>
+
+
 
 <!-- Блок для отображения результатов -->
 <div id="result"></div>
@@ -24,7 +113,7 @@ function checkINN() {
     const id = document.getElementById('company').value;
 
     if (!id) {
-        alert("Пожалуйста, выберите компанию из списка.");
+        alert("Пожалуйста, выберите нашу компанию из списка.");
         return; // Останавливаем выполнение функции, если компания не выбрана
     }
     // Отправляем запрос на сервер
@@ -38,7 +127,6 @@ function checkINN() {
     })
     .then(response => response.json())
     .then(data => {
-   alert(`Наш айди епт ${id}`)
    function escapeHtml(unsafe) {
     return unsafe
         .replace(/&/g, "&amp;")
@@ -48,200 +136,237 @@ function checkINN() {
         .replace(/'/g, "&#039;");
 }
         // Если ИНН найден
-        if (data.found) {
-        alert(`Краткая информация о партнере: ${data.partner_short},ID: ${data.id}`);
-        const partnerShortEscaped = escapeHtml(data.partner_short);
-            document.getElementById('result').innerHTML = `
-                <h2>${data.type} найден: ${data.transporter_name}</h2>
-                <form method="POST" action="{% url 'fill_template' %}">
-                {% csrf_token %}
-                <input type="hidden" id="our_id" name="our_id" value="${id}">
-                <input type="hidden" id="partner_id" name="partner_id" value="${data.id}">
-                    <div class="form-group">
-                        <label for="transporter">Перевозчик:</label>
-                        <input type="text" id="transporter" name="transporter" value="${partnerShortEscaped}" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="transporter_cont">Контакт перевозчика:</label>
-                        <input type="text" id="transporter_cont" name="transporter_cont" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="order_date">Дата заявки:</label>
-                        <input type="text" id="order_date" name="order_date" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="order_num">Номер заявки:</label>
-                        <input type="text" id="order_num" name="order_num" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="sender">Отправитель:</label>
-                        <input type="text" id="sender" name="sender" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="receiver">Получатель:</label>
-                        <input type="text" id="receiver" name="receiver" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="address_from">Адрес погрузки:</label>
-                        <input type="text" id="address_from" name="address_from" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="address_to">Адрес выгрузки:</label>
-                        <input type="text" id="address_to" name="address_to" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="date_load">Дата и время погрузки:</label>
-                        <input type="text" id="date_load" name="date_load" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="date_unload">Дата и время выгрузки:</label>
-                        <input type="text" id="date_unload" name="date_unload" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="contact_send">Контакт отправителя:</label>
-                        <input type="text" id="contact_send" name="contact_send" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="contact_receive">Контакт получателя:</label>
-                        <input type="text" id="contact_receive" name="contact_receive" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="driver">ФИО водителя:</label>
-                        <input type="text" id="driver" name="driver" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="passport_num">Номер паспорта водителя:</label>
-                        <input type="text" id="passport_num" name="passport_num" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="passport_issue">Паспорт выдан(кем и когда):</label>
-                        <input type="text" id="passport_issue" name="passport_issue" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="vehicle">Т/С:</label>
-                        <input type="text" id="vehicle" name="vehicle" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="vehicle_num">Гос.номер:</label>
-                        <input type="text" id="vehicle_num" name="vehicle_num" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Контактный телефон:</label>
-                        <input type="text" id="phone" name="phone" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="cargo">Наименование груза:</label>
-                        <input type="text" id="cargo" name="cargo" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="quantity">Количество:</label>
-                        <input type="text" id="quantity" name="quantity" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="weight">Вес:</label>
-                        <input type="text" id="weight" name="weight" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="volume">Объем:</label>
-                        <input type="text" id="volume" name="volume" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="type_pack">Тип упаковки:</label>
-                        <input type="text" id="type_pack" name="type_pack">
-                    </div>
-                    <div class="form-group">
-                        <label for="add_info">Дополнительная информация:</label>
-                        <input type="text" id="add_info" name="add_info" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="price">Стоимость перевозки:</label>
-                        <input type="text" id="price" name="price" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="conditions">Условия оплаты:</label>
-                        <input type="text" id="conditions" name="conditions" required>
-                    </div>
-                    <button type="submit">Отправить</button>
-                </form>
+            if (data.found) {
+                const partnerShortEscaped = escapeHtml(data.partner_short);
+                document.getElementById('result').innerHTML = `
+                    <h2>${data.type} найден: ${data.transporter_name}</h2><br>
+                    ${
+                        data.bank_check == 'yes'
+                        ? `
+                            <form method="POST" action="{% url 'fill_template' %}" target="_blank">
+                                {% csrf_token %}
+                                <input type="hidden" id="our_id" name="our_id" value="${id}" />
+                                <input type="hidden" id="partner_id" name="partner_id" value="${data.id}" />
+                                <section class="wrapper">
+                                    <div class="form-row">
+                                        <label for="transporter_bankt">Банковские реквизиты перевозчика:</label>
+                                        <select id="transporter_bank" name="transporter_bank" required>
+                                            <option value="">Выберите реквизиты</option>
+                                            ${data.banks.map(bank => `<option value="${bank.id}">${bank.bank_name} - ${bank.account}</option>`).join('')}
+                                        </select>
+                                    </div>
 
-            `;
-        } else {
-            // Если ИНН не найден
-            document.getElementById('result').innerHTML = `
-                <h2>ИНН ${data.inn} не найден</h2>
-                <p>Контрагент с таким ИНН отсутствует. <a href="{% url 'add_partner' %}">Добавить нового контрагента</a></p>
-            `;
-        }
-    });
+                                    <div class="form-row">
+                                        <label for="transporter_cont">Контакт перевозчика:</label>
+                                        ${
+                                            data.contact_received
+                                            ? `
+                                                <select id="transporter_cont" name="transporter_cont" required onchange="toggleOtherContact()">
+                                                    <option value="">Выберите контакт</option>
+                                                    ${data.contacts.map(contact => `<option value="${contact.id}">${contact.name} - ${contact.phone}</option>`).join('')}
+                                                    <option value="other">Другой контакт</option>
+                                                </select>
+                                            `
+                                            : `
+                                                <div id="newContactFields">
+                                                    <center><h5>Новый контакт перевозчика</h5></center>
+                                                    <div class="form-row">
+                                                        <label for="new_position">Должность:</label>
+                                                        <select id="new_position" name="new_position" required>
+                                                            <option value="">Выберите должность</option>
+                                                            <option value="manager">Менеджер</option>
+                                                            <option value="director">Директор</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-row">
+                                                        <label for="new_contact">ФИО:</label>
+                                                        <input type="text" id="new_contact" name="new_contact" />
+                                                    </div>
+                                                    <div class="form-row">
+                                                        <label for="new_phone">Телефон:</label>
+                                                        <input type="text" id="new_phone" name="new_phone" />
+                                                    </div>
+                                                    <div class="form-row">
+                                                        <label for="new_email">Email:</label>
+                                                        <input type="text" id="new_email" name="new_email" />
+                                                    </div>
+                                                </div>
+                                            `
+                                        }
+                                    </div>
+
+                                    <div id="otherContactFields">
+                                        <center><h5>Другой контакт перевозчика</h5></center>
+                                        <div class="form-row">
+                                            <label for="other_position">Должность:</label>
+                                            <select id="other_position" name="other_position">
+                                                <option value="">Выберите должность</option>
+                                                <option value="manager">Менеджер</option>
+                                                <option value="director">Директор</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="other_contact">ФИО:</label>
+                                            <input type="text" id="other_contact" name="other_contact" />
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="other_phone">Телефон:</label>
+                                            <input type="text" id="other_phone" name="other_phone" />
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="other_email">Email:</label>
+                                            <input type="text" id="other_email" name="other_email" />
+                                        </div>
+                                    </div>
+
+                                    <div id="generalFields">
+                                        <center><h3>Общая информация</h3></center><br>
+                                        <div class="form-row">
+                                            <label for="transporter">Перевозчик:</label>
+                                            <input class="form-control" type="text" id="transporter" name="transporter" value="${partnerShortEscaped}" readonly />
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="order_date">Дата заявки:</label>
+                                            <input type="text" id="order_date" name="order_date" />
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="order_num">Номер заявки:</label>
+                                            <input type="text" id="order_num" name="order_num" />
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="sender">Отправитель:</label>
+                                            <input type="text" id="sender" name="sender" />
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="receiver">Получатель:</label>
+                                            <input type="text" id="receiver" name="receiver" />
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="address_from">Адрес погрузки:</label>
+                                            <input type="text" id="address_from" name="address_from" />
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="address_to">Адрес выгрузки:</label>
+                                            <input type="text" id="address_to" name="address_to" />
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="date_load">Дата и время погрузки:</label>
+                                            <input type="text" id="date_load" name="date_load" />
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="date_unload">Дата и время выгрузки:</label>
+                                            <input type="text" id="date_unload" name="date_unload" />
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="contact_send">Контакт отправителя:</label>
+                                            <input type="text" id="contact_send" name="contact_send" />
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="contact_receive">Контакт получателя:</label>
+                                            <input type="text" id="contact_receive" name="contact_receive" />
+                                        </div>
+                                    </div>
+
+                                    <div id="driverFields">
+                                        <center><h3>Информация о водителе</h3></center><br>
+                                        <div class="form-row">
+                                            <label for="driver">ФИО водителя:</label>
+                                            <input type="text" id="driver" name="driver" />
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="passport_num">Номер паспорта водителя:</label>
+                                            <input type="text" id="passport_num" name="passport_num" />
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="passport_issue">Паспорт выдан (кем и когда):</label>
+                                            <input type="text" id="passport_issue" name="passport_issue" />
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="vehicle">Т/С:</label>
+                                            <input type="text" id="vehicle" name="vehicle" />
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="vehicle_num">Гос. номер:</label>
+                                            <input type="text" id="vehicle_num" name="vehicle_num" />
+                                        </div>
+                                        <div class="form-row">
+                                            <label for="phone">Контактный телефон:</label>
+                                            <input type="text" id="phone" name="phone" />
+                                        </div>
+                                    </div>
+
+                                    <div id="cargoFields">
+                                        <center><h3>Информация о грузе</h3></center><br>
+      <div class="form-row">
+        <label for="cargo">Наименование груза:</label>
+        <input type="text" id="cargo" name="cargo"  />
+      </div>
+      <div class="form-row">
+        <label for="quantity">Количество:</label>
+        <input type="text" id="quantity" name="quantity" />
+      </div>
+      <div class="form-row">
+        <label for="weight">Вес:</label>
+        <input type="text" id="weight" name="weight" />
+      </div>
+      <div class="form-row">
+        <label for="volume">Объем:</label>
+        <input type="text" id="volume" name="volume"  />
+      </div>
+      <div class="form-row">
+        <label for="type_pack">Тип упаковки:</label>
+        <input type="text" id="type_pack" name="type_pack" />
+      </div>
+      <div class="form-row">
+        <label for="add_info">Дополнительная информация:</label>
+        <input type="text" id="add_info" name="add_info"  />
+      </div>
+      <div class="form-row">
+        <label for="price">Стоимость перевозки:</label>
+        <input type="text" id="price" name="price"  />
+      </div>
+      <div class="form-row">
+        <label for="conditions">Условия оплаты:</label>
+        <input type="text" id="conditions" name="conditions"  />
+      </div>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <center><input type="submit" value="Создать заявку" /></center>
+                                    </div>
+                                </section>
+                            </form>
+                        `
+                        : `<p>Банковские реквизиты не найдены. Нажмите кнопку "добавить" и повторите поиск после заполнения<br></p>
+                             <form method="POST" action="{% url 'process_bank' %}" target="_blank">
+                                {% csrf_token %}
+                            <input type="hidden" id="rek_id" name="rek_id" value="${data.id}" />
+                            <input type="submit" value="Добавить банковские реквизиты" />
+                            </form>
+                        `
+
+
+
+                    }
+
+                `;
+                console.log(data.id);
+            } else {
+                document.getElementById('result').innerHTML = `<p>ИНН не найден в базе данных.</p>`;
+            }
+        });
+    }
+
+function toggleOtherContact() {
+    const transporterContSelect = document.getElementById('transporter_cont');
+    const otherContactFields = document.getElementById('otherContactFields');
+
+    if (transporterContSelect.value === 'other') {
+        otherContactFields.style.visibility = 'visible';
+    } else {
+        otherContactFields.style.visibility = 'hidden';
+    }
 }
-// тут конец предыдущего кода
 
-
-    function submitForm() {
-
-        // Собираем данные из всех полей формы
-        const our_id = document.getElementById('our_id').value;
-        const partner_id = document.getElementById('partner_id').value;
-        const transporter = document.getElementById('transporter').value;
-        const sender = document.getElementById('sender').value;
-        const receiver = document.getElementById('receiver').value;
-        const addressFrom = document.getElementById('address_from').value;
-        const addressTo = document.getElementById('address_to').value;
-        const dateLoad = document.getElementById('date_load').value;
-        const dateUnload = document.getElementById('date_unload').value;
-        const contactSend = document.getElementById('contact_send').value;
-        const contactReceive = document.getElementById('contact_receive').value;
-        const driver = document.getElementById('driver').value;
-        const passportNum = document.getElementById('passport_num').value;
-        const passportIssue = document.getElementById('passport_issue').value;
-        const vehicle = document.getElementById('vehicle').value;
-        const vehicleNum = document.getElementById('vehicle_num').value;
-        const phone = document.getElementById('phone').value;
-        const cargo = document.getElementById('cargo').value;
-        const quantity = document.getElementById('quantity').value;
-        const weight = document.getElementById('weight').value;
-        const volume = document.getElementById('volume').value;
-        const typePack = document.getElementById('type_pack').value;
-        const addInfo = document.getElementById('add_info').value;
-        const price = document.getElementById('price').value;
-        const conditions = document.getElementById('conditions').value;
-
-
-        // Отправляем данные на сервер
-        fetch("{% url 'fill_template' %}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}"  // передаем токен CSRF
-            },
-            body: JSON.stringify({
-                partner_id: partner_id,
-                our_id: our_id,
-                transporter: transporter,
-                sender: sender,
-                receiver: receiver,
-                address_from: addressFrom,
-                address_to: addressTo,
-                date_load: dateLoad,
-                date_unload: dateUnload,
-                contact_send: contactSend,
-                contact_receive: contactReceive,
-                driver: driver,
-                passport_num: passportNum,
-                passport_issue: passportIssue,
-                vehicle: vehicle,
-                vehicle_num: vehicleNum,
-                phone: phone,
-                cargo: cargo,
-                quantity: quantity,
-                weight: weight,
-                volume: volume,
-                type_pack: typePack,
-                add_info: addInfo,
-                price: price,
-                conditions: conditions
-            })
-        })
-}
 </script>
 {% endblock %}

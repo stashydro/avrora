@@ -37,7 +37,7 @@ class Rekvizity(models.Model):
     ati_id = models.IntegerField(null=True,blank=True)
     company = models.ForeignKey(Partner, on_delete=models.CASCADE, related_name='counterparties')
     def __str__(self):
-        return f'Реквизиты: {self.company_short}({self.company.name})'
+        return f'Реквизиты: {self.id}-{self.company_short}({self.company.name})'
 
 class BankAccount(models.Model):
     rekvizity = models.ForeignKey(Rekvizity, on_delete=models.CASCADE, related_name='bank_accounts', verbose_name="Реквизиты")
@@ -65,7 +65,7 @@ class Our_company(models.Model):
     correspondent_account = models.CharField(max_length=20, verbose_name="Корреспондентский счет")  # Корреспондентский счет
     checking_account = models.CharField(max_length=20, verbose_name="Расчетный счет")  # Расчетный счет
     def __str__(self):
-        return self.name
+        return f'{self.id}-{self.name}'
 
 
 # Создал модель для контактов контрагентов, связь с контактами

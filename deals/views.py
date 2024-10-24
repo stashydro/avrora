@@ -2,7 +2,7 @@ import json
 from datetime import timedelta
 
 from django.db.models import Sum
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -172,17 +172,45 @@ def check_inn(request):
         inn = data.get('inn')
         our_id =data.get('id')
         partner = Rekvizity.objects.filter(inn=inn).first()
+        partner_banks = BankAccount.objects.filter(rekvizity=partner)
+        if partner_banks:
+            bank_check = 'yes'
+            banks= [{'bank_name': partner_bank.bank_name, 'account': partner_bank.checking_account,
+                     'id': partner_bank.id} for partner_bank in partner_banks]
+        else:
+            bank_check = 'no'
+            banks = False
         if partner:
             partner_short = partner.company_short
             partner_type = partner.company.get_type_display()
-            return JsonResponse({
-                'found': True,
-                'transporter_name': partner.company.name,
-                'type': partner_type,
-                'id': partner.id,
-                'our_id': our_id,
-                'partner_short': partner_short
-            } )
+            contact_id = partner.company.id
+            contacts = Contact.objects.filter(partner=contact_id)
+            cont_data = [{'id': contact.id, 'name': contact.name, 'phone': contact.phone} for contact in contacts]
+            if len(cont_data) > 0:
+                return JsonResponse({
+                    'bank_check': bank_check,
+                    'banks': banks,
+                    'found': True,
+                    'contact_received': True,
+                    'transporter_name': partner.company.name,
+                    'type': partner_type,
+                    'id': partner.id,
+                    'our_id': our_id,
+                    'partner_short': partner_short,
+                    'contacts': cont_data
+                } )
+            else:
+                return JsonResponse({
+                    'bank_check': bank_check,
+                    'banks': banks,
+                    'found': True,
+                    'contact_received': False,
+                    'transporter_name': partner.company.name,
+                    'type': partner_type,
+                    'id': partner.id,
+                    'our_id': our_id,
+                    'partner_short': partner_short,
+                } )
         else:
             print('не найдено')
             return JsonResponse({'found': False, 'inn': inn})
@@ -191,19 +219,52 @@ def check_inn(request):
 
 def fill_template(request):
     if request.method == 'POST':
-        our_id = request.POST.get('our_id')
         partner_id = request.POST.get('partner_id')
+        a = request.POST.get('transporter_cont')
+        if a:
+            if a == 'other':
+                partner_rek = Rekvizity.objects.get(pk=partner_id)
+                partner = partner_rek.company
+                new_contact = Contact.objects.create(
+                    name=request.POST.get('other_contact'),
+                    phone=request.POST.get('other_phone'),
+                    position=request.POST.get('other_position'),
+                    email=request.POST.get('other_email'),
+                    partner=partner
+                )
+                transporter_cont = new_contact
+            else:
+                transporter_cont = Contact.objects.get(pk=a)
+        else:
+            phone = request.POST.get('new_phone')
+            contact_existing_check = Contact.objects.filter(phone=phone)
+            if contact_existing_check:
+                print(True)
+                contact = Contact.objects.get(phone=phone)
+                transporter_cont = contact
+                print(transporter_cont)
+            else:
+                partner_rek = Rekvizity.objects.get(pk=partner_id)
+                partner = partner_rek.company
+                new_contact = Contact.objects.create(
+                    name=request.POST.get('new_contact'),
+                    phone=request.POST.get('new_phone'),
+                    position=request.POST.get('new_position'),
+                    email=request.POST.get('new_email'),
+                    partner=partner
+                )
+                transporter_cont = new_contact
+        our_id = request.POST.get('our_id')
         banks = BankAccount.objects.filter(rekvizity=partner_id).first()
         ours = Our_company.objects.filter(pk=our_id).first()
         partners = Rekvizity.objects.filter(pk=partner_id).first()
         contact_id = partners.company.id
         contact = Contact.objects.filter(partner = contact_id).first()
-
         context = {
             'contact': contact,
             'banks': banks,
             'ours': ours,
-            'transporter_cont': request.POST.get('transporter_cont'),
+            'transporter_cont': transporter_cont,
             'partners': partners,
             'order_date': request.POST.get('order_date'),
             'order_num': request.POST.get('order_num'),
@@ -231,6 +292,10 @@ def fill_template(request):
             'price': request.POST.get('price'),
             'conditions': request.POST.get('conditions')
         }
-        print('Vse ok',our_id,partner_id,ours.company_short)
+        print('Vse ok',transporter_cont.name, transporter_cont.position)
         return render(request, 'deals/order_template.html', context)
-        #return JsonResponse({'received': True})
+
+def process_bank(request):
+    if request.method == 'POST':
+        id = request.POST.get('rek_id')
+        return redirect('add_bank', company_id=id)

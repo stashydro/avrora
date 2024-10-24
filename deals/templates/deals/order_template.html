@@ -263,7 +263,11 @@
 body { margin-left: 0.25in; margin-right: 0.25in; margin-top: 0.75in; margin-bottom: 0.75in; }
 </style>
 <div style="position: relative;">
-    <img src="{% static 'images/tsamp.png' %}" alt="stamp" style="width: 472px; height: 420; position: absolute; top: 1350px; left: 300px; z-index: 10;">
+    {% if ours.name == "Аврора" %}
+        <img src="{% static 'images/tsamp.png' %}" alt="stamp" style="width: 472px; height: 420; position: absolute; top: 1350px; left: 300px; z-index: 10;">
+    {% else %}
+        <img src="{% static 'images/stamp_at.png' %}" alt="stamp" style="width: 350px; height: 260px; position: absolute; top: 1350px; left: 300px; z-index: 10;">
+    {% endif %}
     <img src="{% static 'images/sign.png' %}" alt="stamp" style="width: 100px; height: 100px; position: absolute; top: 1450px; left: 360px; z-index: 10;">
     <table border="0" cellpadding="0" cellspacing="0" id="sheet0" class="sheet0 gridlines">
         <col class="col0">
@@ -326,7 +330,7 @@ body { margin-left: 0.25in; margin-right: 0.25in; margin-top: 0.75in; margin-bot
             <td class="column1 style57 s style57" colspan="2">ЗАКАЗЧИК ПЕРЕВОЗКИ<br />
 </td>
             <td class="column3 style58 s style58" colspan="3">{{ ours.company_short }}</td>
-            <td class="column6 style59 s style59" colspan="2">менеджер </td>
+            <td class="column6 style59 s style59" colspan="2">Менеджер </td>
             <td class="column8 style1 s">8-953-371-37-76</td>
           </tr>
           <tr class="row7">
@@ -334,8 +338,8 @@ body { margin-left: 0.25in; margin-right: 0.25in; margin-top: 0.75in; margin-bot
             <td class="column1 style57 s style57" colspan="2">ИСПОЛНИТЕЛЬ ПЕРЕВОЗКИ<br />
 </td>
             <td class="column3 style58 f style58" colspan="3">{{ partners.company_short }}</td>
-            <td class="column6 style59 s style59" colspan="2">менеджер </td>
-            <td class="column8 style1 null">{{ transporter_cont }}</td>
+            <td class="column6 style59 s style59" colspan="2">{{ transporter_cont.get_position_display }} </td>
+            <td class="column8 style1 null">{{ transporter_cont.name }}<br>{{ transporter_cont.phone }}</td>
           </tr>
           <tr class="row8">
             <td class="column0">&nbsp;</td>
@@ -361,7 +365,7 @@ body { margin-left: 0.25in; margin-right: 0.25in; margin-top: 0.75in; margin-bot
           <tr class="row11">
             <td class="column0">&nbsp;</td>
             <td class="column1 style57 s style57" colspan="2">ДАТА И ВРЕМЯ ПОГРУЗКИ</td>
-            <td class="column3 style60 s style60" colspan="6">1{{ date_load }}</td>
+            <td class="column3 style60 s style60" colspan="6">{{ date_load }}</td>
           </tr>
           <tr class="row12">
             <td class="column0">&nbsp;</td>
@@ -376,7 +380,7 @@ body { margin-left: 0.25in; margin-right: 0.25in; margin-top: 0.75in; margin-bot
           <tr class="row14">
             <td class="column0">&nbsp;</td>
             <td class="column1 style57 s style57" colspan="4">КОЛИЧЕСТВО ТС, ТИП П/ПРИЦЕПА (грузоподъемность, тент/борт, способ погрузки верх/бок, количество ремней), ФИО и тел.водителя</td>
-            <td class="column5 style62 f style62" colspan="4">{{ driver }}<br />
+            <td class="column5 style62 f style62" colspan="4">ФИО: {{ driver }}<br />
 Паспорт: {{ passport_num }}<br />
 Выдан: {{ passport_issue }}<br />
 Т/С.: {{ vehicle }}<br />
@@ -444,7 +448,7 @@ body { margin-left: 0.25in; margin-right: 0.25in; margin-top: 0.75in; margin-bot
             <td class="column1 style74 s style74" colspan="2">ФИО ВОДИТЕЛЯ (полностью прописью)</td>
             <td class="column3 style75 f style75" colspan="2">{{ driver }}</td>
             <td class="column5 style76 s style76" colspan="2">Контактные данные курирующего перевозку менеджера:</td>
-            <td class="column7 style77 f style77" colspan="2">{{ transporter_cont }}</td>
+            <td class="column7 style77 f style77" colspan="2">{{ transporter_cont.name }}<br>{{ transporter_cont.phone }}</td>
           </tr>
           <tr class="row25">
             <td class="column0">&nbsp;</td>

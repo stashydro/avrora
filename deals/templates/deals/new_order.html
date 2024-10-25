@@ -137,6 +137,7 @@ function checkINN() {
 }
         // Если ИНН найден
             if (data.found) {
+
                 const partnerShortEscaped = escapeHtml(data.partner_short);
                 document.getElementById('result').innerHTML = `
                     <h2>${data.type} найден: ${data.transporter_name}</h2><br>
@@ -329,6 +330,15 @@ function checkINN() {
         <label for="conditions">Условия оплаты:</label>
         <input type="text" id="conditions" name="conditions"  />
       </div>
+      <div>
+    <label>
+        <input type="checkbox" id="searchCheckbox" onclick="toggleTextInput()"> Искать в тексте
+    </label>
+    <div id="textInputContainer" style="display: none;">
+        <input type="text" id="searchText" maxlength="1000" placeholder="Введите текст" />
+        <button type="button" onclick="parse()">Отправить</button>
+    </div>
+</div>
                                     </div>
 
                                     <div class="form-row">
@@ -356,7 +366,45 @@ function checkINN() {
             }
         });
     }
+function toggleTextInput() {
+    const checkbox = document.getElementById('searchCheckbox');
+    const textInputContainer = document.getElementById('textInputContainer');
+    textInputContainer.style.display = checkbox. checked ? 'block' : 'none';
+}
 
+function parse() {
+    const data = document.getElementById('searchText').value;
+    console.log(data);
+    // Отправляем запрос на сервер
+    fetch("{% url 'gpt_process' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"  // передаем токен CSRF
+        },
+        body: JSON.stringify({ 'data': data })
+    })  // Закрывающая скобка для fetch
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        if (data.success) {
+                // Автоматически заполняем поля формы
+            console.log(data);
+            document.getElementById('cargo').value = data.cargo || "не указано" ? data.cargo : "";
+            document.getElementById('weight').value = data.weight || "не указано" ? data.weight : "";
+            document.getElementById('quantity').value = data.quantity || "не указано" ? data.quantity : "";
+            document.getElementById('volume').value = data.volume || "Не указано" ? data.volume : "";
+            document.getElementById('date_load').value = data.load_date || "Не указано" ? data.load_date : "";
+            document.getElementById('date_unload').value = data.unload_date || "Не указано" ? data.unload_date : "";
+            document.getElementById('address_from').value = data.load_place || "Не указано" ? data.load_place : "";
+            document.getElementById('address_to').value = data.unload_place || "Не указано" ? data.unload_place : "";
+    } else {
+            console.log('Прошла строчка');
+                alert(data.message);  // Обрабатываем ответ
+        }
+    })
+    .catch(error => console.error('Ошибка:', error));
+}
 function toggleOtherContact() {
     const transporterContSelect = document.getElementById('transporter_cont');
     const otherContactFields = document.getElementById('otherContactFields');

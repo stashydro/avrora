@@ -1,6 +1,7 @@
 import json
 from datetime import timedelta
 
+import openai
 from django.db.models import Sum
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
@@ -21,7 +22,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth import logout
 
-
+from openai import OpenAI
 # # Create your views here.
 # def home(request):
 #     deals = Deal.objects.all()
@@ -299,3 +300,54 @@ def process_bank(request):
     if request.method == 'POST':
         id = request.POST.get('rek_id')
         return redirect('add_bank', company_id=id)
+
+
+def gpt_process(request):
+    if request.method == 'POST':
+        receive = json.loads(request.body)
+        data = receive.get('data')
+        print(f'Получили данные:{data}')
+    client = OpenAI(api_key="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")
+    completion =client.beta.chat.completions.parse(
+        model="gpt-4o-2024-08-06",
+        messages=[
+            {"role": "system", "content": "Ты менеджер по логистике со стажем в 5 лет и опытом в различных вариантах клиентских запросов"},
+            {
+                "role": "user",
+                "content": f"Извлеки данные о грузе и верни ответ в формате чистый json("
+                           f"где cargo-тип груза,load_place-место погрузки включая город и адрес,"
+                           f"unload_place-место выгрузки включая город и адрес,"
+                           f"weight - вес, quantity - количество, volume-объем,load_date-дата погрузки,unload_date-дата выгрузки."
+                           f"load_place и unload_place не дели по городу и адресу а запиши в одно поле).Также пожалуйста указывай единицы измерений где применимо:{data}"
+            }
+        ]
+    )
+    print('Получили ответ от GPT')
+    result=completion.json()
+    result_2 = json.loads(result)
+    print(f'вот такое вот пока получилось:{result_2}')
+    result_3 = result_2['choices'][0]['message']['content']
+    print(f'Потом такое: {result_3}')
+    cleaned_string = result_3.strip('```')
+    print(f'Без кавычек: {cleaned_string}')
+    if 'json' in cleaned_string:
+        print('Очищаем от json')
+        cleaned_string = cleaned_string.strip("json")
+        data_dict = json.loads(cleaned_string)
+        response = {
+                'success': True,
+                'cargo': data_dict['cargo'],
+                'quantity': data_dict['quantity'],
+                'load_place': data_dict['load_place'],
+                'unload_place': data_dict['unload_place'],
+                'weight': data_dict['weight'],
+                'volume': data_dict['volume'],
+                'load_date': data_dict['load_date'],
+                'unload_date': data_dict['unload_date']
+        }
+        print(response)
+        return JsonResponse(response)
+    else:
+        return HttpResponse('Error!')
+
+

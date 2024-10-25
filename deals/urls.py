@@ -11,4 +11,5 @@ urlpatterns = [
     path('check_inn', views.check_inn, name='check_inn'),
     path('fill_template', views.fill_template, name='fill_template'),
     path('process_bank', views.process_bank, name='process_bank'),
+    path('gpt_process', views.gpt_process, name='gpt_process'),
 ]

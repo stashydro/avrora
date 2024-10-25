@@ -1,6 +1,6 @@
 import json
 from datetime import timedelta
-
+import os
 import openai
 from django.db.models import Sum
 from django.http import JsonResponse, HttpResponse
@@ -307,9 +307,11 @@ def gpt_process(request):
         receive = json.loads(request.body)
         data = receive.get('data')
         print(f'Получили данные:{data}')
-    client = OpenAI(api_key="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")
-    completion =client.beta.chat.completions.parse(
-        model="gpt-4o-2024-08-06",
+    api_key = os.getenv("OPENAI_API_KEY")
+    print(api_key)
+    client = OpenAI(api_key=api_key)
+    completion = client.beta.chat.completions.parse(
+        model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "Ты менеджер по логистике со стажем в 5 лет и опытом в различных вариантах клиентских запросов"},
             {
@@ -320,7 +322,8 @@ def gpt_process(request):
                            f"weight - вес, quantity - количество, volume-объем,load_date-дата погрузки,unload_date-дата выгрузки."
                            f"load_place и unload_place не дели по городу и адресу а запиши в одно поле).Также пожалуйста указывай единицы измерений где применимо:{data}"
             }
-        ]
+        ],
+        temperature = 0.2
     )
     print('Получили ответ от GPT')
     result=completion.json()
@@ -330,24 +333,21 @@ def gpt_process(request):
     print(f'Потом такое: {result_3}')
     cleaned_string = result_3.strip('```')
     print(f'Без кавычек: {cleaned_string}')
-    if 'json' in cleaned_string:
-        print('Очищаем от json')
-        cleaned_string = cleaned_string.strip("json")
-        data_dict = json.loads(cleaned_string)
-        response = {
-                'success': True,
-                'cargo': data_dict['cargo'],
-                'quantity': data_dict['quantity'],
-                'load_place': data_dict['load_place'],
-                'unload_place': data_dict['unload_place'],
-                'weight': data_dict['weight'],
-                'volume': data_dict['volume'],
-                'load_date': data_dict['load_date'],
-                'unload_date': data_dict['unload_date']
-        }
-        print(response)
-        return JsonResponse(response)
-    else:
-        return HttpResponse('Error!')
+
+    cleaned_string = cleaned_string.strip("json")
+    data_dict = json.loads(cleaned_string)
+    response = {
+            'success': True,
+            'cargo': data_dict['cargo'],
+            'quantity': data_dict['quantity'],
+            'load_place': data_dict['load_place'],
+            'unload_place': data_dict['unload_place'],
+            'weight': data_dict['weight'],
+            'volume': data_dict['volume'],
+            'load_date': data_dict['load_date'],
+            'unload_date': data_dict['unload_date']
+    }
+    print(response)
+    return JsonResponse(response)
 
 

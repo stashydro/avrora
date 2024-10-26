@@ -8,9 +8,9 @@ class Deal(models.Model):
     transporter = models.ForeignKey(Partner, on_delete=models.CASCADE, related_name='deals_as_transporter', limit_choices_to={'type': 'trans'}, verbose_name="Перевозчик")
     trans_text = models.CharField(max_length=100)
     trans_our_company = models.ForeignKey(Our_company, on_delete=models.CASCADE, related_name='trans_our_company',verbose_name='Договор с перевозчиком от нас')
-    income = models.FloatField(verbose_name="Доход")  # Доход от сделки
-    outcome = models.FloatField(verbose_name="Расход")  # Расход по сделке
-    add_costs = models.FloatField(verbose_name="Дополнительные затраты")  # Дополнительные затраты
+    income = models.FloatField(verbose_name="Доход", max_length=8)  # Доход от сделки
+    outcome = models.FloatField(verbose_name="Расход", max_length=8)  # Расход по сделке
+    add_costs = models.FloatField(verbose_name="Дополнительные затраты", max_length=7)  # Дополнительные затраты
     result = models.FloatField(verbose_name="Результат сделки")  # Результат сделки (например, чистая прибыль)
     description = models.TextField(blank=True, null=True, verbose_name="Описание сделки")  # Описание сделки
     complete = models.BooleanField(default=False, verbose_name="Сделка завершена")  # Завершена ли сделка (да/нет)

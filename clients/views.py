@@ -25,10 +25,16 @@ def partners(request):
 @login_required(login_url='login')
 def add_partner(request):
     if request.method == 'POST':
+        fromOrder = request.POST.get('fromOrder')
+        if fromOrder.isdigit():
+            pass
+        else:
+            fromOrder = False
         form = PartnerForm(request.POST)
         if form.is_valid():
             partner = form.save()
             request.session['company_id'] = partner.id
+            request.session['fromOrder'] = fromOrder
             company_id = partner.id
             if 'save_and_exit' in request.POST:
                 return redirect('partners')
@@ -36,8 +42,9 @@ def add_partner(request):
                 return redirect('add_rekvizity',company_id=company_id)
     else:
         form = PartnerForm()
+        fromOrder = False
 
-    return render(request,'clients/add_partner.html', {'form': form})
+    return render(request,'clients/add_partner.html', {'form': form, 'fromOrder': fromOrder})
 
 @login_required(login_url='login')
 def add_rekvizity(request, company_id):
@@ -55,8 +62,12 @@ def add_rekvizity(request, company_id):
                 return redirect('add_bank',company_id=rek_id)
     else:
         form = RekvizityForm(initial={'rekvizity': company_id})
+        data = request.session.pop('fromOrder')
+        if data:
+           return render(request,'clients/add_rekvizity.html', {'form': form, 'data': data})
+        else:
+           return render(request, 'clients/add_rekvizity.html', {'form': form})
 
-    return render(request,'clients/add_rekvizity.html', {'form': form})
 
 @login_required(login_url='login')
 def get_company_info(request):
@@ -196,3 +207,16 @@ def partner_detail(request,partner_id):
         'contact_missing': contacts is None
     }
     return render(request,'clients/partner_detail.html', context)
+
+def newTransporterFromOrder(request):
+    if request.method == 'POST':
+        form_1 = PartnerForm(request.POST)
+        form_2 = RekvizityForm(request.POST)
+        form_3 = BankAccountForm(request.POST)
+        form_4 = ContactForm(request.POST)
+    else:
+        form_1 = PartnerForm()
+        form_2 = RekvizityForm()
+        form_3 = BankAccountForm()
+        form_4 = ContactForm()
+    return render(request, 'deals/new_order.html', {'form_1': form_1,'form_2': form_2,'form_3': form_3,'form_4': form_4})

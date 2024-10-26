@@ -5,7 +5,7 @@
 
   <form action="" method="post">
     {% csrf_token %}
-
+  <input type="hidden" id="fromOrder" name="fromOrder" value= {{ fromOrder }}>
     <div class="form-group">
       {{ form.as_p }}
     </div>

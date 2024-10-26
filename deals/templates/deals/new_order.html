@@ -79,7 +79,7 @@
     <div class="form-group row">
         <label for="inn" class="col-sm-2 col-form-label">ИНН перевозчика:</label>
         <div class="col-sm-10">
-            <input type="text" id="inn" name="inn" class="form-control" required>
+            <input type="number" id="inn" name="inn" class="form-control" required>
         </div>
     </div>
 
@@ -106,7 +106,6 @@
 
 <!-- Блок для отображения результатов -->
 <div id="result"></div>
-
 <script>
 function checkINN() {
     const inn = document.getElementById('inn').value;
@@ -362,7 +361,15 @@ function checkINN() {
                 `;
                 console.log(data.id);
             } else {
-                document.getElementById('result').innerHTML = `<p>ИНН не найден в базе данных.</p>`;
+                document.getElementById('result').innerHTML =
+                `
+                <p>ИНН не найден в базе данных!.</p>
+                <form method='POST' action='{% url "add_partner" %}'>
+                {% csrf_token %}
+                <input type="hidden" id="fromOrder" name="fromOrder" value=${data.inn}>
+                <button type='submit' class='btn btn-primary'>Создать контрагента с этим ИНН?</button>
+                </form>
+                `;
             }
         });
     }

@@ -1,8 +1,7 @@
 {% extends 'deals/base.html' %}
 {% block content %}
 <div class="container mt-4">
-  <h2>Добавить компанию</h2>
-
+  <h2>Добавить реквизиты компании</h2>
   <form action="" method="post">
     {% csrf_token %}
     <div class="form-group">
@@ -19,7 +18,35 @@
 </div>
 
 <script>
+const innValue = "{{ data|default:'' }}";
+    if (innValue) {
+      document.getElementById('id_inn').value = innValue;
+              fetch('{% url 'get_company_info' %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',  // CSRF защита для Django
+            },
+            body: JSON.stringify({inn: innValue})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Автоматически заполняем поля формы
+                document.getElementById('id_company_short').value = data.company_short;
+                document.getElementById('id_company_full').value = data.company_full;
+                document.getElementById('id_legal_address').value = data.legal_address;
+                document.getElementById('id_director').value = data.director;
+                document.getElementById('id_ogrn').value = data.ogrn;
+                document.getElementById('id_kpp').value = data.kpp;
+                document.getElementById('id_okpo').value = data.okpo;
+            } else {
+                alert(data.message);
+            }
+        })
+      }
 document.getElementById('search-inn').addEventListener('click', function() {
+
     var inn = document.getElementById('id_inn').value;
 
     if (inn) {
